@@ -3,33 +3,85 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Kelas;
+use App\Models\UserModel;
 
 class UserController extends Controller
 {
-    // Method untuk menampilkan form create_user
     public function create()
     {
-        return view('create_user');
+        // Mengirim data kelas ke view create_user
+        // dd(Kelas::all());
+        return view('create_user', [
+            'kelas' => Kelas::all(),
+        ]);
     }
 
-    // Method untuk menangani submit form dari create_user dan menampilkan view profile
     public function store(Request $request)
     {
-        // Validasi data input dari form
-        $request->validate([
+        // Validasi data input menggunakan validate()
+        $validatedData = $request->validate([
             'nama' => 'required|string|max:255',
-            'npm' => 'required|numeric',
-            'kelas' => 'required|string|max:10',
+            'npm' => 'required|string|max:255',
+            'kelas_id' => 'required|exists:kelas,id',
         ]);
-
-        // Ambil data dari form
         $data = [
             'nama' => $request->input('nama'),
+            'kelas' => $request->input('kelas'),
             'npm' => $request->input('npm'),
-            'kelas' => $request->input('kelas')
         ];
+    
+        // Simpan data user ke database
+        $user = UserModel::create($validatedData);
+    
+        // Muat relasi kelas untuk user
+        $user->load('kelas');
+    
+        // Kirim data ke view profile
+        return view('profile', [
+            'nama' => $user->nama,
+            'npm' => $user->npm,
+            'nama_kelas' => $user->kelas->nama_kelas ?? 'Kelas tidak ditemukan',
+        ]);
+    }
+    public function uploadProfilePicture(Request $request)
+    {
+        // Validasi file gambar
+        $request->validate([
+            'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // Maksimal 2MB
+        ]);
 
-        // Kembalikan view profile dengan data yang di-submit dari form
-        return view('profile', $data);
+        // Ambil file dari form
+        $file = $request->file('profile_picture');
+
+        // Tentukan nama file yang unik untuk disimpan di public/assets/img
+        $fileName = time().'_'.$file->getClientOriginalName();
+
+        // Pindahkan file ke folder public/assets/img
+        $file->move(public_path('assets/img'), $fileName);
+
+        // Buat path file yang akan digunakan di view
+        $profile_picture_path = 'assets/img/' . $fileName;
+
+        // Redirect ke halaman profil dengan path gambar yang baru dan data user
+        return back()->with([
+            'profile_picture' => $profile_picture_path,
+            'nama' => $request->input('nama'),
+            'npm' => $request->input('npm'),
+            'nama_kelas' => $request->input('kelas_id') // Sesuaikan dengan data yang sudah disimpan
+        ]);
+    }
+
+    public function showProfile($id)
+    {
+        // Ambil data user dari database
+        $user = User::findOrFail($id);
+
+        return view('profile', [
+            'nama' => $user->nama,
+            'npm' => $user->npm,
+            'nama_kelas' => $user->kelas->nama_kelas ?? 'Kelas tidak ditemukan', // Ambil nama kelas dari relasi
+            'profile_picture' => session('profile_picture', 'public/assets/img/fotodev.jpg'), // Ambil profile picture dari session
+        ]);
     }
 }
