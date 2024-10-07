@@ -1,8 +1,7 @@
 <?php
 
-use App\http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserController; // pastikan ada import ini
 
 /*
 |--------------------------------------------------------------------------
@@ -16,11 +15,12 @@ use App\Http\Controllers\UserController;
 */
 
 Route::get('/', function () {return view('welcome');});
-
 // Route untuk tugas 2
 Route::get('/profile', [ProfileController::class, 'profile']);
-
-// Route untuk tugas 2
 Route::get('/user/profile', [ProfileController::class, 'profile']);
+
+// Route untuk tugas 3 & 4
 Route::get('/user/create', function () {return view('create_user');});
 Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
+Route::get('/user/create', [UserController::class, 'create'])->name('user.create');
+Route::post('/profile/upload', [ProfileController::class, 'uploadProfilePicture'])->name('upload.profile.picture');
