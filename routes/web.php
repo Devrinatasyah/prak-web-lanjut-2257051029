@@ -1,6 +1,8 @@
 <?php
 
+use App\http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,11 +15,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', function () {return view('welcome');});
 
-use App\Http\Controllers\ProfileController;
+// Route untuk tugas 2
+Route::get('/profile', [ProfileController::class, 'profile']);
 
-Route::get('/profile/{nama}/{kelas}/{npm}',
-[ProfileController::class, 'profile']);
+// Route untuk tugas 2
+Route::get('/user/profile', [ProfileController::class, 'profile']);
+Route::get('/user/create', function () {return view('create_user');});
+Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
