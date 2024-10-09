@@ -14,6 +14,6 @@ class UserModel extends Model
 
     public function kelas()
     {
-        return $this->belongsTo(Kelas::class, 'kelas_id');
+        return $this->belongsTo(kelas::class, 'kelas_id');
     }
 }
