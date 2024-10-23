@@ -1,4 +1,5 @@
-<!-- create_user.blade.php -->
+@extends('layouts.app')
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,128 +7,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create User</title>
     <style>
-       
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    margin: 0;
-    background: linear-gradient(to right, #ff9a9e, #fecfef);
-}
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(to right, #ff9a9e, #fecfef);
+        }
 
-.form-container, .profile-container {
-    text-align: center;
-    background-color: #fff5f8;
-    padding: 40px;
-    border-radius: 20px;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-    width: 450px;
-    transition: transform 0.3s ease;
-}
+        .form-container {
+            text-align: center;
+            background-color: #fff5f8;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            width: 450px;
+            transition: transform 0.3s ease;
+        }
 
-.form-container:hover, .profile-container:hover {
-    transform: translateY(-10px);
-}
+        .form-container:hover {
+            transform: translateY(-10px);
+        }
 
-h1, h2 {
-    font-family: 'Segoe UI', sans-serif;
-    color: #ff758c;
-    margin-bottom: 30px;
-    font-size: 24px;
-}
+        h1 {
+            color: #ff758c;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
 
-input, select {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 2px solid #ff758c;
-    border-radius: 10px;
-    background-color: #fff;
-    font-size: 16px;
-    color: #333;
-    outline: none;
-}
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #ff758c;
+            border-radius: 10px;
+            background-color: #fff;
+            font-size: 16px;
+            color: #333;
+            outline: none;
+        }
 
-input:focus, select:focus {
-    border-color: #ff7eb3;
-}
+        input:focus, select:focus {
+            border-color: #ff7eb3;
+        }
 
-input[type="submit"], button {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 10px;
-    background-color: #ff758c;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 20px;
-    font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-}
+        input[type="submit"], button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background-color: #ff758c;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
 
-input[type="submit"]:hover, button:hover {
-    background-color: #ff7eb3;
-    transform: translateY(-2px);
-}
+        input[type="submit"]:hover, button:hover {
+            background-color: #ff7eb3;
+            transform: translateY(-2px);
+        }
 
-.logo {
-    width: 100px;
-    height: 100px;
-    margin-bottom: 20px;
-}
+        .text-danger {
+            color: #ff4757;
+            text-align: left;
+            font-size: 14px;
+            margin-top: 5px;
+        }
 
-.avatar {
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 5px solid #ff758c;
-    margin-bottom: 25px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.avatar:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 25px rgba(255, 119, 119, 0.5);
-}
-
-.detail {
-    padding: 12px;
-    margin-bottom: 18px;
-    border-radius: 12px;
-    background-color: rgba(255, 117, 140, 0.15);
-    color: #ff758c;
-    font-weight: 500;
-    transition: all 0.3s ease;
-}
-
-.detail:hover {
-    background-color: rgba(255, 117, 140, 0.25);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
-
-.pesan-error {
-    color: #0059ff;
-    text-align: left;
-    font-size: 14px;
-    margin-top: 5px;
-}
-
-.input-invalid {
-    border-color: #ff4757;
-}
-
-label {
-    display: block;
-    text-align: left;
-    margin-top: 10px;
-    color: #ff758c;
-    font-weight: bold;
-}
+        label {
+            display: block;
+            text-align: left;
+            margin-top: 10px;
+            color: #ff758c;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -137,26 +95,26 @@ label {
             <h1>Create User</h1>
 
             <label for="nama">Nama:</label>
-        <input type="text" id="nama" name="nama" value="{{ old('nama') }}">
-        @foreach($errors->get('nama') as $msg)
-            <p class="text-danger">{{ $msg }}</p>
-        @endforeach
-
-        <label for="npm">NPM:</label>
-        <input type="text" id="npm" name="npm" value="{{ old('npm') }}">
-        @foreach($errors->get('npm') as $msg)
-            <p class="text-danger">{{ $msg }}</p>
-        @endforeach
-
-        <label for="kelas_id">Kelas:</label>
-        <select name="kelas_id" id="kelas_id" required>
-            @foreach ($kelas as $kelasItem)
-                <option value="{{ $kelasItem->id }}">{{ $kelasItem->nama_kelas }}</option>
+            <input type="text" id="nama" name="nama" value="{{ old('nama') }}" required>
+            @foreach($errors->get('nama') as $msg)
+                <p class="text-danger">{{ $msg }}</p>
             @endforeach
-        </select>
-        @foreach($errors->get('kelas_id') as $msg)
-            <p class="text-danger">{{ $msg }}</p>
-        @endforeach
+
+            <label for="npm">NPM:</label>
+            <input type="text" id="npm" name="npm" value="{{ old('npm') }}" required>
+            @foreach($errors->get('npm') as $msg)
+                <p class="text-danger">{{ $msg }}</p>
+            @endforeach
+
+            <label for="kelas_id">Kelas:</label>
+            <select name="kelas_id" id="kelas_id" required>
+                @foreach ($kelas as $kelasItem)
+                    <option value="{{ $kelasItem->id }}">{{ $kelasItem->nama_kelas }}</option>
+                @endforeach
+            </select>
+            @foreach($errors->get('kelas_id') as $msg)
+                <p class="text-danger">{{ $msg }}</p>
+            @endforeach
 
             <input type="submit" value="Submit">
         </form>
