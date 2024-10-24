@@ -16,7 +16,7 @@ class Kelas extends Model
     protected $table = 'kelas'; // Use single quotes for the table name
 
     // Define the relationship between Kelas and UserModel
-    public function user()
+    public function users()
     {
         return $this->hasMany(UserModel::class, 'kelas_id');
     }

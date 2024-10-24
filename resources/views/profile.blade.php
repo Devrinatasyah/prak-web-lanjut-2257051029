@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
     <style>
-       
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
@@ -25,32 +24,16 @@
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
             width: 450px;
             transition: transform 0.3s ease;
-            position: relative; /* Add this */
+            position: relative;
         }
 
         .profile-container:hover {
             transform: translateY(-10px);
         }
 
-
-        .logo {
-            width: 80px;
-            height: 80px;
-            position: absolute;
-            top: -20px;
-            left: -10px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-            box-shadow: 2px 5px 25px 10px rgba(240, 252, 14, 0.1);
-            background-color: #f2fc94;
-        }
-
         .avatar {
-            width: 180px;
-            height: 180px;
+            width: 120px; /* Ukuran baru untuk lebar */
+            height: 120px; /* Ukuran baru untuk tinggi */
             border-radius: 50%;
             object-fit: cover;
             border: 5px solid #ff758c;
@@ -78,18 +61,19 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
-
-
     </style>
 </head>
 <body>
     <div class="profile-container">
-        
-        <img src="/assets/img/fotodev.jpg" alt="User Avatar" class="avatar">
+        @if($user->foto)
+            <img src="{{ asset('storage/' . $user->foto) }}" alt="Foto {{ $user->nama }}" class="avatar"> <!-- Menambahkan class 'avatar' di sini -->
+        @endif
         <div class="user-details">
-            <h2 class="detail">{{ $nama }}</h2>
-            <h2 class="detail">{{ $npm }}</h2>
-            <h2 class="detail">{{ $nama_kelas ?? 'Kelas tidak ditemukan' }}</h2>
+            <h2 class="detail">{{ $user->nama }}</h2>
+            <h2 class="detail">{{ $user->nama_kelas ?? 'Kelas tidak ditemukan' }}</h2>
+            <h2 class="detail">{{ $user->jurusan ?? 'Jurusan tidak ditemukan' }}</h2>
+            <h2 class="detail">semester {{ $user->semester ?? 'Semester tidak ditemukan' }}</h2>
+            <h2 class="detail"> {{ $user->fakultas->nama_fakultas ?? 'Fakultas tidak ditemukan' }}</h2>
         </div>
     </div>
 </body>

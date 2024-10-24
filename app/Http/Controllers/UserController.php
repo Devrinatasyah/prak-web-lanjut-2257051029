@@ -5,75 +5,185 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Kelas;
 use App\Models\UserModel;
+use App\Models\Fakultas;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    // Define public properties for UserModel and Kelas
-    public $userModel;
-    public $kelasModel;
+    protected $userModel;
+    protected $kelasModel;
 
-    // Constructor to initialize the models manually
     public function __construct()
     {
-        $this->userModel = new UserModel(); // Initialize UserModel
-        $this->kelasModel = new Kelas();    // Initialize Kelas model
+        $this->userModel = new UserModel(); 
+        $this->kelasModel = new Kelas();    
     }
 
-    public function profile($nama = "Devrinatasyah", $kelas = "B", $npm = "2257051029")
-    {
-        $data = [
-            'nama' => $nama,
-            'kelas' => $kelas,
-            'npm' => $npm,
-        ];
+    // Method untuk menampilkan profil pengguna
+public function profile($id)
+{
+    // Eager load 'kelas' and 'fakultas' relationships
+    $data = $this->userModel->with(['kelas', 'fakultas'])->find($id);
 
-        return view('profile', $data);
+    if (!$data) {
+        return redirect()->route('user.list')->with('error', 'Pengguna tidak ditemukan');
     }
 
+    return view('profile', [
+        'title' => 'Profil Pengguna',
+        'user' => $data,
+    ]);
+}
+
+
+    // Method untuk menampilkan form pembuatan pengguna
     public function create()
     {
-        // Use the kelasModel property to get class data
         $kelas = $this->kelasModel->getKelas();
+        $fakultas = Fakultas::all();
 
-        // Prepare the data for the view
-        $data = [
-            'title' => 'Create User', // Adding the title key
+        return view('create_user', [
+            'title' => 'Buat Pengguna',
             'kelas' => $kelas,
-        ];
-
-        // Return the create_user view with the class data and title
-        return view('create_user', data: $data);
+            'fakultas' => $fakultas,
+        ]);
     }
 
+    // Method untuk menyimpan pengguna baru
     public function store(Request $request)
-{
-    // Validasi input dari request
-    $validatedData = $request->validate([
-        'nama' => 'required|string|max:255',
-        'npm' => 'required|string|max:255',
-        'kelas_id' => 'required|exists:kelas,id',
-    ]);
+    {
+        // Validasi input
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'kelas_id' => 'required|integer',
+            'jurusan' => 'required|string|max:255',
+            'semester' => 'required|string|max:255',
+            'fakultas_id' => 'required|integer',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
 
-    // Gunakan userModel untuk menyimpan data pengguna
-    $this->userModel->create([
-        'nama' => $request->input('nama'),
-        'npm' => $request->input('npm'),
-        'kelas_id' => $request->input('kelas_id'),
-    ]);
+        // Upload foto jika ada
+        $fotoPath = null;
+        if ($request->hasFile('foto')) {
+            $fotoPath = $request->file('foto')->store('photos', 'public');
+        }
+        
+        // Simpan data pengguna
+        $this->userModel->create([
+            'nama' => $request->input('nama'),
+            'kelas_id' => $request->input('kelas_id'),
+            'jurusan' => $request->input('jurusan'),
+            'semester' => $request->input('semester'),
+            'fakultas_id' => $request->input('fakultas_id'),
+            'foto' => $fotoPath,
+        ]);
 
-    // Redirect ke halaman /user setelah menyimpan data
-    return redirect()->to('/user');
-}
-    // Updated index method
+        return redirect()->route('user.list')->with('success', 'Pengguna berhasil diperbarui!');
+    }    
+
+    // Method untuk menampilkan detail pengguna
+    public function show($id)
+    {
+        $user = $this->userModel->getUser($id);
+
+        if (!$user) {
+            return redirect()->route('user.list')->with('error', 'Pengguna tidak ditemukan');
+        }
+
+        return view('profile', [
+            'title' => 'Profil',
+            'user' => $user,
+        ]);
+    }
+
+    // Method untuk menampilkan daftar pengguna
     public function index()
     {
-        // Fetch user data using the getUser() method from UserModel
         $data = [
-            'title' => 'User List', // Title for the page
-            'users' => $this->userModel->getUser(), // Get all users with related class data
+            'title' => 'Daftar Pengguna',
+            'users' => $this->userModel->with(['kelas', 'fakultas'])->get(),
         ];
 
-        // Return the list_user view with the fetched data
         return view('list_user', $data);
+    }
+
+    // Method untuk menampilkan form edit
+    public function edit($id)
+    {
+        $user = $this->userModel->find($id);
+
+        if (!$user) {
+            return redirect()->route('user.list')->with('error', 'Pengguna tidak ditemukan');
+        }
+
+        $kelas = $this->kelasModel->getKelas();
+        $fakultas = Fakultas::all();
+
+        return view('edit', [
+            'title' => 'Edit Pengguna',
+            'user' => $user,
+            'kelas' => $kelas,
+            'fakultas' => $fakultas,
+        ]);
+    }
+
+    // Method untuk memperbarui data pengguna
+    public function update(Request $request, $id)
+    {
+        // Validasi input
+        $request->validate([
+            'nama' => 'required|string|max:255',
+            'kelas_id' => 'required|integer',
+            'jurusan' => 'required|string|max:255',
+            'semester' => 'required|string|max:255',
+            'fakultas_id' => 'required|integer',
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
+        $user = $this->userModel->find($id);
+
+        if (!$user) {
+            return redirect()->route('user.list')->with('error', 'Pengguna tidak ditemukan');
+        }
+
+        // Update data pengguna
+        $user->nama = $request->input('nama');
+        $user->kelas_id = $request->input('kelas_id');
+        $user->jurusan = $request->input('jurusan');
+        $user->semester = $request->input('semester');
+        $user->fakultas_id = $request->input('fakultas_id');
+
+        // Update foto jika diupload
+        if ($request->hasFile('foto')) {
+            // Hapus foto lama jika ada
+            if ($user->foto) {
+                Storage::disk('public')->delete('photos/' . $user->foto);
+            }
+
+            $user->foto = $request->file('foto')->store('photos', 'public');
+        }
+
+        $user->save();
+
+        return redirect()->route('user.list')->with('success', 'Pengguna berhasil diperbarui!');
+    }
+
+    // Method untuk menghapus pengguna
+    public function destroy($id)
+    {
+        $user = $this->userModel->find($id);
+
+        if (!$user) {
+            return redirect()->route('user.list')->with('error', 'Pengguna tidak ditemukan');
+        }
+
+        // Hapus foto pengguna jika ada
+        if ($user->foto) {
+            Storage::disk('public')->delete('photos/' . $user->foto);
+        }
+
+        $user->delete();
+
+        return redirect()->route('user.list')->with('success', 'Pengguna berhasil dihapus!');
     }
 }
